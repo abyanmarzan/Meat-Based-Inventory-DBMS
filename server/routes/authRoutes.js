@@ -1,7 +1,7 @@
-import express from 'express';
-import { connectionToDatabase } from '../lib/db.js';
 import bcrypt from 'bcrypt';
+import express from 'express';
 import jwt from 'jsonwebtoken';
+import { connectionToDatabase } from '../lib/db.js';
 
 const router = express.Router();
 
@@ -454,7 +454,8 @@ router.put('/updatemeatprep/:id', async (req, res) => {
 });
 
 // Add Environmental Condition
-router.post('/addenvironment', async (req, res) => {
+// Add Environmental Record
+router.post('/addenvironmental', async (req, res) => {
   const { batch_number, timestamp, temperature_celsius, humidity_percent, location } = req.body;
   try {
     const db = await connectionToDatabase();
@@ -462,11 +463,12 @@ router.post('/addenvironment', async (req, res) => {
       'INSERT INTO environmental_conditions (batch_number, timestamp, temperature_celsius, humidity_percent, location) VALUES (?, ?, ?, ?, ?)',
       [batch_number, timestamp, temperature_celsius, humidity_percent, location]
     );
-    res.status(201).json({ message: "Environmental record added successfully" });
+    res.status(201).json({ message: "Record added successfully" });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
 
 // Get All Environmental Records
 router.get('/allenvironment', async (req, res) => {
@@ -505,57 +507,6 @@ router.put('/updateenvironment/:id', async (req, res) => {
   }
 });
 
-// Add Loss Record
-router.post('/addloss', async (req, res) => {
-  const { batch_number, stage, loss_quantity, reason, loss_date } = req.body;
-  try {
-      const db = await connectionToDatabase();
-      await db.query(
-          'INSERT INTO loss_tracking (batch_number, stage, loss_quantity, reason, loss_date) VALUES (?, ?, ?, ?, ?)',
-          [batch_number, stage, loss_quantity, reason, loss_date]
-      );
-      res.status(201).json({ message: "Loss record added successfully" });
-  } catch (err) {
-      res.status(500).json({ message: "Server error", error: err.message });
-  }
-});
-
-// Get All Loss Records
-router.get('/alllosses', async (req, res) => {
-  try {
-      const db = await connectionToDatabase();
-      const [rows] = await db.query('SELECT * FROM loss_tracking');
-      res.status(200).json(rows);
-  } catch (err) {
-      res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Delete Loss Record
-router.delete('/deleteloss/:id', async (req, res) => {
-  try {
-      const db = await connectionToDatabase();
-      await db.query('DELETE FROM loss_tracking WHERE loss_id = ?', [req.params.id]);
-      res.status(200).json({ message: "Loss record deleted successfully" });
-  } catch (err) {
-      res.status(500).json({ message: "Server error", error: err.message });
-  }
-});
-
-// Update Loss Record
-router.put('/updateloss/:id', async (req, res) => {
-  const { batch_number, stage, loss_quantity, reason, loss_date } = req.body;
-  try {
-      const db = await connectionToDatabase();
-      await db.query(
-          'UPDATE loss_tracking SET batch_number = ?, stage = ?, loss_quantity = ?, reason = ?, loss_date = ? WHERE loss_id = ?',
-          [batch_number, stage, loss_quantity, reason, loss_date, req.params.id]
-      );
-      res.status(200).json({ message: "Loss record updated successfully" });
-  } catch (err) {
-      res.status(500).json({ message: "Server error", error: err.message });
-  }
-});
 
 
 
@@ -716,9 +667,61 @@ router.put('/updatemeasure/:id', async (req, res) => {
 });
 
 
+// Add Loss Record
+router.post('/addloss', async (req, res) => {
+  const { batch_number, stage, loss_quantity, reason, loss_date } = req.body;
+  try {
+      const db = await connectionToDatabase();
+      await db.query(
+          'INSERT INTO loss_tracking (batch_number, stage, loss_quantity, reason, loss_date) VALUES (?, ?, ?, ?, ?)',
+          [batch_number, stage, loss_quantity, reason, loss_date]
+      );
+      res.status(201).json({ message: "Loss record added successfully" });
+  } catch (err) {
+      res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Get All Loss Records
+router.get('/alllosses', async (req, res) => {
+  try {
+      const db = await connectionToDatabase();
+      const [rows] = await db.query('SELECT * FROM loss_tracking');
+      res.status(200).json(rows);
+  } catch (err) {
+      res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete Loss Record
+router.delete('/deleteloss/:id', async (req, res) => {
+  try {
+      const db = await connectionToDatabase();
+      await db.query('DELETE FROM loss_tracking WHERE loss_id = ?', [req.params.id]);
+      res.status(200).json({ message: "Loss record deleted successfully" });
+  } catch (err) {
+      res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Update Loss Record
+router.put('/updateloss/:id', async (req, res) => {
+  const { batch_number, stage, loss_quantity, reason, loss_date } = req.body;
+  try {
+      const db = await connectionToDatabase();
+      await db.query(
+          'UPDATE loss_tracking SET batch_number = ?, stage = ?, loss_quantity = ?, reason = ?, loss_date = ? WHERE loss_id = ?',
+          [batch_number, stage, loss_quantity, reason, loss_date, req.params.id]
+      );
+      res.status(200).json({ message: "Loss record updated successfully" });
+  } catch (err) {
+      res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+
 
 export default router;
-
 
 
 
